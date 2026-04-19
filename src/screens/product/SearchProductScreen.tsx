@@ -7,6 +7,7 @@ import { RootStackParamList } from '@/types/navigation';
 import ProductCard from '@/components/ProductCard';
 import { useProducts } from '@/hooks/useProducts';
 import { Product } from '@/types';
+import CartButton from '@/components/CartButton';
 
 export default function SearchProductScreen() {
   const insets = useSafeAreaInsets();
@@ -57,9 +58,7 @@ export default function SearchProductScreen() {
             </TouchableOpacity>
           )}
         </View>
-        <TouchableOpacity className="p-2" onPress={() => console.log('Buka Keranjang')}>
-          <Ionicons name="cart-outline" size={26} color="black" />
-        </TouchableOpacity>
+        <CartButton />
       </View>
 
       {!loading && (

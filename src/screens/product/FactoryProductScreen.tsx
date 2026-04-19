@@ -7,6 +7,7 @@ import { RootStackParamList } from '@/types/navigation';
 import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
 import { useProducts } from '@/hooks/useProducts';
+import CartButton from '@/components/CartButton';
 
 export default function FactoryProductScreen() {
   const insets = useSafeAreaInsets();
@@ -42,9 +43,7 @@ export default function FactoryProductScreen() {
             {brandName}
           </Text>
         </View>
-        <TouchableOpacity className="p-2" onPress={() => console.log('Buka Keranjang')}>
-          <Ionicons name="cart-outline" size={26} color="black" />
-        </TouchableOpacity>
+        <CartButton />
       </View>
 
       <View className="px-4 py-2">

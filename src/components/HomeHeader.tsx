@@ -4,6 +4,7 @@ import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useNavigation, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/types/navigation';
+import CartButton from './CartButton';
 
 export default function HomeHeader() {
   const insets = useSafeAreaInsets();
@@ -20,9 +21,12 @@ export default function HomeHeader() {
     <View className="rounded-b-3xl bg-red-500 px-4 pb-5" style={{ paddingTop: insets.top + 16 }}>
       <View className="mb-5 flex-row items-center justify-between">
         <Text className="text-2xl font-bold text-white">Hello, Diecaster</Text>
-        <TouchableOpacity className="rounded-xl bg-white/20 p-2">
-          <Ionicons name="cart" size={20} color="white" />
-        </TouchableOpacity>
+        <CartButton 
+          iconName="cart" 
+          iconColor="white" 
+          size={20} 
+          containerClassName="rounded-xl bg-white/20 p-2" 
+        />
       </View>
       <View className="flex-row items-center rounded-xl bg-white px-4 py-3">
         <Ionicons name="search" size={20} color="gray" />

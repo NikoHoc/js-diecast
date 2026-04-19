@@ -7,12 +7,15 @@ import { RootStackParamList } from '@/types/navigation';
 import { useProductDetail } from '@/hooks/useProductDetail';
 import { formatRupiah } from '@/utils/formatters';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import LoginReminderModal from '@/components/LoginReminderModal';
+import CartButton from '@/components/CartButton';
 
 const { width } = Dimensions.get('window');
 
 export default function ProductDetailScreen() {
   const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'ProductDetail'>>();
+  const [modalVisible, setModalVisible] = useState(false);
   const { productId } = route.params;
 
   const { product, loading } = useProductDetail(productId);
@@ -33,6 +36,16 @@ export default function ProductDetailScreen() {
   const images = [product.photo];
   const isOutOfStock = Number(product.stock) === 0;
 
+  const isLoggedIn = false;
+
+  const handleActionWithAuth = (actionName: string) => {
+    if (!isLoggedIn) {
+      setModalVisible(true);
+    } else {
+      console.log('Melakukan aksi:', actionName);
+    }
+  };
+
   return (
     <View className="flex-1 bg-white">
       <SafeAreaView edges={['top']} className="border-b border-gray-100 bg-white">
@@ -41,9 +54,7 @@ export default function ProductDetailScreen() {
             <Ionicons name="arrow-back" size={26} color="black" />
           </TouchableOpacity>
           <View className="flex-row items-center space-x-4">
-            <TouchableOpacity onPress={() => console.log('Cart')}>
-              <Ionicons name="cart-outline" size={26} color="black" />
-            </TouchableOpacity>
+            <CartButton />
           </View>
         </View>
       </SafeAreaView>
@@ -143,7 +154,7 @@ export default function ProductDetailScreen() {
         <TouchableOpacity
           className={`h-12 flex-1 items-center justify-center rounded-xl border ${isOutOfStock ? 'border-gray-200 bg-gray-50' : 'border-red-500 bg-white'}`}
           disabled={isOutOfStock}
-          onPress={() => console.log('Beli Langsung')}>
+          onPress={() => handleActionWithAuth('Beli Langsung')}>
           <Text className={`font-bold ${isOutOfStock ? 'text-gray-300' : 'text-red-500'}`}>
             Beli Langsung
           </Text>
@@ -152,10 +163,19 @@ export default function ProductDetailScreen() {
         <TouchableOpacity
           className={`h-12 flex-1 items-center justify-center rounded-xl ${isOutOfStock ? 'bg-gray-300' : 'bg-red-500'}`}
           disabled={isOutOfStock}
-          onPress={() => console.log('Tambah ke keranjang')}>
+          onPress={() => handleActionWithAuth('Tambah Keranjang')}>
           <Text className="font-bold text-white">+ Keranjang</Text>
         </TouchableOpacity>
       </View>
+
+      <LoginReminderModal
+        visible={modalVisible}
+        onClose={() => setModalVisible(false)}
+        onLogin={() => {
+          setModalVisible(false);
+          navigation.navigate('Login' as never);
+        }}
+      />
     </View>
   );
 }

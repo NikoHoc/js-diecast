@@ -6,6 +6,7 @@ import { useBrands } from '@/hooks/useBrands';
 import { NavigationProp, useNavigation } from '@react-navigation/native';
 import { RootStackParamList } from '@/types/navigation';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import CartButton from '@/components/CartButton';
 
 export default function FactoryScreen() {
   const insets = useSafeAreaInsets();
@@ -23,14 +24,7 @@ export default function FactoryScreen() {
       
       <View className="flex-row items-center justify-between px-2 py-3">
         <Text className="text-2xl font-bold ml-4 text-gray-800">Daftar Pabrikan</Text>
-        <TouchableOpacity 
-          className="p-2"
-          onPress={() => {
-            console.log('Buka Keranjang');
-          }}
-        >
-          <Ionicons name="cart-outline" size={26} color="black" />
-        </TouchableOpacity>
+        <CartButton />
       </View>
 
       <View className="px-4 py-2 border-b border-gray-100 pb-4">

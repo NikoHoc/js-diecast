@@ -9,26 +9,19 @@ export function useProducts(brandId?: number, searchQuery?: string) {
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      let endpoint = '/product';
-      const queryParams: string[] = [];
-      if (brandId) {
-        queryParams.push(`brand_id=${brandId}`);
-      }
-      if (searchQuery) {
-        queryParams.push(`search=${encodeURIComponent(searchQuery)}`);
-      }
-      if (queryParams.length > 0) {
-        endpoint += `?${queryParams.join('&')}`;
-      }
+      const params = new URLSearchParams();
 
-      console.log('Fetching endpoint:', endpoint);
+      if (brandId) params.append('brand_id', String(brandId));
+      if (searchQuery) params.append('search', searchQuery);
+
+      const endpoint = `/product${params.toString() ? `?${params.toString()}` : ''}`;
 
       const result = await api.get<BaseResponse<Product[]>>(endpoint);
 
       if (result.success) {
-        const formattedProducts = result.data.map(item => ({
+        const formattedProducts = result.data.map((item) => ({
           ...item,
-          photo: getImageUrl(item.photo)
+          photo: getImageUrl(item.photo),
         }));
         setProducts(formattedProducts);
       }
