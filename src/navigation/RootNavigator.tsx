@@ -4,6 +4,7 @@ import BottomTabNavigator from './BottomTabNavigator';
 import { RootStackParamList } from '@/types/navigation';
 import FactoryProductScreen from '../screens/product/FactoryProductScreen';
 import ProductDetailScreen from '@/screens/product/ProductDetailScreen';
+import SearchProductScreen from '@/screens/product/SearchProductScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -14,6 +15,7 @@ export default function RootNavigator() {
       
       <Stack.Screen name="FactoryProduct" component={FactoryProductScreen} />
       <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+      <Stack.Screen name="SearchProduct" component={SearchProductScreen} />
 
     </Stack.Navigator>
   );

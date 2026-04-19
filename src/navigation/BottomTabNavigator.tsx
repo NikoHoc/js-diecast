@@ -17,9 +17,10 @@ export default function BottomTabNavigator() {
         tabBarActiveTintColor: '#EF4444',
         tabBarInactiveTintColor: 'gray',
         tabBarStyle: {
-          paddingBottom: 5,
-          paddingTop: 5,
-          height: 60,
+          padding: 20,
+          height: 80,
+          borderRadius: 20,
+          backgroundColor: 'white',
         },
         tabBarIcon: ({ focused, color, size }) => {
           let iconName: keyof typeof Ionicons.glyphMap = 'home';

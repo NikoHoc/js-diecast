@@ -2,16 +2,29 @@ import { useState, useEffect, useCallback } from 'react';
 import { api, getImageUrl } from '@/services/api';
 import { BaseResponse, Product } from '@/types';
 
-export function useProducts(brandId?: number) {
+export function useProducts(brandId?: number, searchQuery?: string) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const endpoint = brandId ? `/product?brand_id=${brandId}` : '/product';
+      let endpoint = '/product';
+      const queryParams: string[] = [];
+      if (brandId) {
+        queryParams.push(`brand_id=${brandId}`);
+      }
+      if (searchQuery) {
+        queryParams.push(`search=${encodeURIComponent(searchQuery)}`);
+      }
+      if (queryParams.length > 0) {
+        endpoint += `?${queryParams.join('&')}`;
+      }
+
+      console.log('Fetching endpoint:', endpoint);
+
       const result = await api.get<BaseResponse<Product[]>>(endpoint);
-      
+
       if (result.success) {
         const formattedProducts = result.data.map(item => ({
           ...item,
@@ -24,7 +37,7 @@ export function useProducts(brandId?: number) {
     } finally {
       setLoading(false);
     }
-  }, [brandId]);
+  }, [brandId, searchQuery]);
 
   useEffect(() => {
     loadProducts();
