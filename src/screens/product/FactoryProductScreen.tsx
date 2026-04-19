@@ -3,11 +3,10 @@ import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator } 
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
-import { useProducts } from '@/hooks/useProducts';
 import { RootStackParamList } from '@/types/navigation';
-import { formatRupiah } from '@/utils/formatters';
-import ImageWithFallback from '@/components/ImageWithFallback';
 import { Product } from '@/types';
+import ProductCard from '@/components/ProductCard';
+import { useProducts } from '@/hooks/useProducts';
 
 export default function FactoryProductScreen() {
   const insets = useSafeAreaInsets();
@@ -25,35 +24,15 @@ export default function FactoryProductScreen() {
   );
 
   const renderProductCard = ({ item }: { item: Product }) => (
-    <TouchableOpacity className="w-1/2 p-2" onPress={() => console.log('Buka Detail Produk', item.id)}>
-      <View className="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
-        <View className="h-40 bg-gray-50 items-center justify-center">
-          <ImageWithFallback 
-            uri={item.photo} 
-            className="w-full h-full"
-            resizeMode="cover"
-            fallbackIcon="cube-outline" 
-          />
-        </View>
-
-        <View className="p-3">
-          <Text className="text-sm text-gray-800" numberOfLines={2} style={{ height: 40 }}>
-            {item.name}
-          </Text>
-          <Text className="text-base font-bold text-red-500 mt-1">
-            {formatRupiah(item.selling_price)}
-          </Text>
-          <View className="flex-row items-center mt-2">
-            <Text className="text-xs text-gray-500">Stok: {item.stock}</Text>
-          </View>
-        </View>
-      </View>
-    </TouchableOpacity>
+    <ProductCard 
+      key={item.id}
+      product={item}
+      onPress={() => console.log('Detail:', item.id)}
+    />
   );
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
-      
       <View className="flex-row items-center justify-between px-4 py-3">
         <View className="flex-row items-center">
           <TouchableOpacity onPress={() => navigation.goBack()}>

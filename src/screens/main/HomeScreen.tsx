@@ -5,12 +5,17 @@ import { useBrands } from '@/hooks/useBrands';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import ImageWithFallback from '@/components/ImageWithFallback';
+import ProductCard from '@/components/ProductCard';
+import { useProducts } from '@/hooks/useProducts';
 
 export default function HomeScreen() {
     const navigation = useNavigation<BottomTabNavigationProp<any>>();
 
   const { brands, loading } = useBrands();
+  const { products, loading: loadingProducts } = useProducts()
+
   const popularBrands = brands.slice(0, 4);
+  const bestSellers = products.slice(0, 6);
 
   return (
     <View className="flex-1 bg-white">
@@ -43,7 +48,7 @@ export default function HomeScreen() {
                     key={brand.id} 
                     className="items-center w-16"
                     onPress={() => {
-                      navigation.navigate('BrandProduct', { 
+                      navigation.navigate('FactoryProduct', { 
                         brandId: brand.id, 
                         brandName: brand.name 
                       });
@@ -70,9 +75,23 @@ export default function HomeScreen() {
           )}
 
           <Text className="text-lg font-bold text-gray-800 mb-3">Diecast Popular</Text>
-          <View className="h-48 bg-gray-100 rounded-2xl items-center justify-center border-dashed border-2 border-gray-300">
-            <Text className="text-gray-400 font-medium">Card Produk Akan Muncul Di Sini</Text>
-          </View>
+          {loadingProducts ? (
+            <ActivityIndicator size="small" color="#EF4444" className="my-10" />
+          ) : products.length === 0 ? (
+            <View className="py-10 items-center bg-gray-50 rounded-2xl border border-gray-100">
+              <Text className="text-gray-400">Produk belum tersedia</Text>
+            </View>
+          ) : (
+            <View className="flex-row flex-wrap -mx-2">
+              {bestSellers.map((item) => (
+                <ProductCard 
+                  key={item.id}
+                  product={item}
+                  onPress={() => console.log('Detail:', item.id)}
+                />
+              ))}
+            </View>
+          )}
 
         </View>
       </ScrollView>

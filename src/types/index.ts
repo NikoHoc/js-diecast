@@ -19,4 +19,9 @@ export interface Product {
   selling_price: number;
   photo: string | null;
   stock: number;
+  brand?: {
+    id: number;
+    name: string;
+    logo?: string | null;
+  };
 }

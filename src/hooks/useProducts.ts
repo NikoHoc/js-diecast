@@ -2,14 +2,16 @@ import { useState, useEffect, useCallback } from 'react';
 import { api, getImageUrl } from '@/services/api';
 import { BaseResponse, Product } from '@/types';
 
-export function useProducts(brandId: number) {
+export function useProducts(brandId?: number) {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
   const loadProducts = useCallback(async () => {
     setLoading(true);
     try {
-      const result = await api.get<BaseResponse<Product[]>>(`/product?brand_id=${brandId}`);
+      const endpoint = brandId ? `/product?brand_id=${brandId}` : '/product';
+      const result = await api.get<BaseResponse<Product[]>>(endpoint);
+      
       if (result.success) {
         const formattedProducts = result.data.map(item => ({
           ...item,
@@ -25,10 +27,8 @@ export function useProducts(brandId: number) {
   }, [brandId]);
 
   useEffect(() => {
-    if (brandId) {
-      loadProducts();
-    }
-  }, [brandId, loadProducts]);
+    loadProducts();
+  }, [loadProducts]);
 
   return { products, loading };
 }

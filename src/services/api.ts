@@ -50,7 +50,6 @@ export const api = {
     try {
       let res = await fetch(`${BASE_URL}${path}`, options);
 
-      // Otomatis refresh token kalau dapat 401 (Unauthorized)
       if (res.status === 401 && token) {
         const refreshed = await refreshToken();
         if (refreshed) {
