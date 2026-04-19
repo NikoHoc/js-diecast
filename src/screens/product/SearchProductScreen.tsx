@@ -41,11 +41,11 @@ export default function SearchProductScreen() {
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <Ionicons name="arrow-back" size={24} color="black" />
         </TouchableOpacity>
-        <View className="flex-1 flex-row items-center bg-gray-100 rounded-xl px-3 py-2">
+        <View className="flex-1 flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
           <Ionicons name="search" size={18} color="gray" />
           <TextInput 
             placeholder="Cari lagi..." 
-            className="flex-1 ml-2 text-gray-800 p-0"
+            className="flex-1 ml-2 text-gray-800"
             style={{ textAlignVertical: 'center', includeFontPadding: false }}
             value={searchInput}
             onChangeText={setSearchInput}

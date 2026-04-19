@@ -28,11 +28,11 @@ export default function FactoryScreen() {
       </View>
 
       <View className="px-4 py-2 border-b border-gray-100 pb-4">
-        <View className="flex-row items-center bg-gray-100/80 rounded-lg px-3 py-2">
+        <View className="flex-row items-center bg-gray-100/80 rounded-lg px-4 py-3">
           <Ionicons name="search" size={20} color="gray" />
           <TextInput 
             placeholder="Cari..." 
-            className="ml-2 flex-1 text-gray-800 p-0"
+            className="ml-2 flex-1 text-gray-800"
             placeholderTextColor="gray"
             value={searchQuery}
             onChangeText={setSearchQuery}

@@ -32,7 +32,7 @@ export default function HomeHeader() {
         <Ionicons name="search" size={20} color="gray" />
         <TextInput 
           placeholder="Cari mobil impianmu..." 
-          className="flex-1 ml-2 text-gray-800 p-0"
+          className="flex-1 ml-2 text-gray-800"
           placeholderTextColor="gray"
           style={{ textAlignVertical: 'center', includeFontPadding: false }}
           value={searchInput}

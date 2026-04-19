@@ -47,7 +47,7 @@ export default function FactoryProductScreen() {
       </View>
 
       <View className="px-4 py-2">
-        <View className="flex-row items-center bg-gray-100/80 rounded-lg px-3 py-2">
+        <View className="flex-row items-center bg-gray-100/80 rounded-lg px-4 py-3">
           <Ionicons name="search" size={20} color="gray" />
           <TextInput 
             placeholder={`Cari produk di ${brandName}...`} 

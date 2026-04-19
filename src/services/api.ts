@@ -25,6 +25,7 @@ async function refreshToken(): Promise<boolean> {
     }
     return false;
   } catch (error) {
+    console.error('Gagal melakukan refresh token:', error);
     return false;
   }
 }
@@ -75,8 +76,10 @@ export const api = {
 
 export const getImageUrl = (path: string | null) => {
   if (!path) return null;
+  
+  if (path.startsWith('http')) return path;
 
-  const cleanBaseUrl = BASE_URL?.replace(/\/$/, '');
-  const cleanPath = path.replace(/^\//, '');
-  return `${cleanBaseUrl}/${cleanPath}`;
+  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  
+  return `${BASE_URL}/uploads/${cleanPath}`;
 };

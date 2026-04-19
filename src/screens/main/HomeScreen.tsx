@@ -42,7 +42,7 @@ export default function HomeScreen() {
                 <Text className="text-gray-500 font-medium">Pabrikan belum tersedia!</Text>
               </View>
             ) : (
-              <View className="flex-row justify-between mb-6">
+              <View className="flex-row justify-between mb-2">
                 {popularBrands.map((brand) => (
                   <TouchableOpacity 
                     key={brand.id} 
@@ -71,7 +71,7 @@ export default function HomeScreen() {
             )
           )}
 
-          <Text className="text-lg font-bold text-gray-800 mb-3">Diecast Popular</Text>
+          <Text className="text-lg font-bold text-gray-800 mb-2">Diecast Popular</Text>
           {loadingProducts ? (
             <ActivityIndicator size="small" color="#EF4444" className="my-10" />
           ) : products.length === 0 ? (
