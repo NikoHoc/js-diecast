@@ -22,7 +22,7 @@ export default function HomeHeader() {
         <Ionicons name="search" size={20} color="gray" />
         <TextInput
           placeholder="Cari diecast impianmu..."
-          className="flex-1 ml-2 text-base text-gray-800"
+          className="flex-1 ml-2 text-gray-800"
           placeholderTextColor="gray"
         />
       </View>

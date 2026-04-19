@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { View, Text, TextInput, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RouteProp, useNavigation, useRoute } from '@react-navigation/native';
+import { RouteProp, useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
 import { RootStackParamList } from '@/types/navigation';
 import { Product } from '@/types';
 import ProductCard from '@/components/ProductCard';
@@ -10,7 +10,7 @@ import { useProducts } from '@/hooks/useProducts';
 
 export default function FactoryProductScreen() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation();
+  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
   
   const route = useRoute<RouteProp<RootStackParamList, 'FactoryProduct'>>();
   const brandId = route.params?.brandId || 1; 
@@ -27,7 +27,7 @@ export default function FactoryProductScreen() {
     <ProductCard 
       key={item.id}
       product={item}
-      onPress={() => console.log('Detail:', item.id)}
+      onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
     />
   );
 

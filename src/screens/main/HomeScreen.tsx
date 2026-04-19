@@ -62,10 +62,7 @@ export default function HomeScreen() {
                         fallbackIcon="car-sport-outline"
                       />
                     </View>
-                    <Text 
-                      className="text-xs font-medium text-gray-700 text-center"
-                      numberOfLines={1}
-                    >
+                    <Text className="text-xs font-medium text-gray-700 text-center">
                       {brand.name}
                     </Text>
                   </TouchableOpacity>
@@ -87,7 +84,7 @@ export default function HomeScreen() {
                 <ProductCard 
                   key={item.id}
                   product={item}
-                  onPress={() => console.log('Detail:', item.id)}
+                  onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
                 />
               ))}
             </View>
