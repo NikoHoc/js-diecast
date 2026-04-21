@@ -1,8 +1,9 @@
 export type RootStackParamList = {
-  MainTabs: undefined; 
+  MainTabs: { screen: string } | undefined;
   FactoryProduct: { brandId: number; brandName: string }; 
   ProductDetail: { productId: number };
   SearchProduct: { searchQuery: string };
   Login: undefined; 
   Register: undefined;
+  Cart: undefined;
 };

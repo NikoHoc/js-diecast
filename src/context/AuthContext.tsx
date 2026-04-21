@@ -5,6 +5,7 @@ export interface User {
   name: string;
   phone: string;
   store_name?: string;
+  address?: string
 }
 
 interface AuthContextData {
@@ -27,12 +28,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const checkInitialLogin = async () => {
     try {
-      const token = await SecureStore.getItemAsync('access_token');
-      const savedUser = await SecureStore.getItemAsync('customer');
+      const dummyUser: User = {
+        name: "Diecaster Pro",
+        phone: "081234567890"
+      };
+      setUser(dummyUser);
 
-      if (token && savedUser) {
-        setUser(JSON.parse(savedUser));
-      }
+      // const token = await SecureStore.getItemAsync('access_token');
+      // const savedUser = await SecureStore.getItemAsync('customer');
+
+      // if (token && savedUser) {
+      //   setUser(JSON.parse(savedUser));
+      // }
     } catch (error) {
       console.error('Gagal mengecek status login:', error);
     } finally {

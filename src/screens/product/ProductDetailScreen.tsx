@@ -9,6 +9,9 @@ import { formatRupiah } from '@/utils/formatters';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import LoginReminderModal from '@/components/LoginReminderModal';
 import CartButton from '@/components/CartButton';
+import ProductActionModal from '@/components/ProductActionModal';
+import ToastNotification from '@/components/ToastNotification';
+import { useCart } from '@/context/CartContext';
 
 const { width } = Dimensions.get('window');
 
@@ -20,6 +23,27 @@ export default function ProductDetailScreen() {
 
   const { product, loading } = useProductDetail(productId);
   const [currentIndex, setCurrentIndex] = useState(0);
+
+  const { addToCart } = useCart();
+  const [actionModalVisible, setActionModalVisible] = useState(false);
+  const [actionType, setActionType] = useState<'cart' | 'buy'>('cart');
+  const [toastVisible, setToastVisible] = useState(false);
+
+  const openActionModal = (type: 'cart' | 'buy') => {
+    setActionType(type);
+    setActionModalVisible(true);
+  };
+
+  const handleConfirmAction = (quantity: number) => {
+    setActionModalVisible(false);
+
+    if (actionType === 'cart') {
+      addToCart(product, quantity); 
+      setToastVisible(true); 
+    } else {
+      console.log('Navigasi ke Checkout dengan jumlah:', quantity);
+    }
+  };
 
   if (loading || !product) {
     return (
@@ -36,15 +60,15 @@ export default function ProductDetailScreen() {
   const images = [product.photo];
   const isOutOfStock = Number(product.stock) === 0;
 
-  const isLoggedIn = false;
+  // const isLoggedIn = false;
 
-  const handleActionWithAuth = (actionName: string) => {
-    if (!isLoggedIn) {
-      setModalVisible(true);
-    } else {
-      console.log('Melakukan aksi:', actionName);
-    }
-  };
+  // const handleActionWithAuth = (actionName: string) => {
+  //   if (!isLoggedIn) {
+  //     setModalVisible(true);
+  //   } else {
+  //     console.log('Melakukan aksi:', actionName);
+  //   }
+  // };
 
   return (
     <View className="flex-1 bg-white">
@@ -151,19 +175,20 @@ export default function ProductDetailScreen() {
       </ScrollView>
 
       <View className="absolute bottom-0 left-0 right-0 flex-row items-center space-x-3 border-t border-gray-100 bg-white p-5 gap-2">
-        <TouchableOpacity
-          className={`h-12 flex-1 items-center justify-center rounded-xl border ${isOutOfStock ? 'border-gray-200 bg-gray-50' : 'border-red-500 bg-white'}`}
+        <TouchableOpacity 
+          className={`flex-1 h-12 items-center justify-center rounded-xl border ${isOutOfStock ? 'border-gray-200 bg-gray-50' : 'border-red-500 bg-white'}`}
           disabled={isOutOfStock}
-          onPress={() => handleActionWithAuth('Beli Langsung')}>
+          onPress={() => openActionModal('buy')}
+        >
           <Text className={`font-bold ${isOutOfStock ? 'text-gray-300' : 'text-red-500'}`}>
             Beli Langsung
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          className={`h-12 flex-1 items-center justify-center rounded-xl ${isOutOfStock ? 'bg-gray-300' : 'bg-red-500'}`}
+          className={`flex-1 h-12 items-center justify-center rounded-xl ${isOutOfStock ? 'bg-gray-300' : 'bg-red-500'}`}
           disabled={isOutOfStock}
-          onPress={() => handleActionWithAuth('Tambah Keranjang')}>
+          onPress={() => openActionModal('cart')}>
           <Text className="font-bold text-white">+ Keranjang</Text>
         </TouchableOpacity>
       </View>
@@ -175,6 +200,20 @@ export default function ProductDetailScreen() {
           setModalVisible(false);
           navigation.navigate('Login' as never);
         }}
+      />
+
+      <ProductActionModal
+        visible={actionModalVisible}
+        onClose={() => setActionModalVisible(false)}
+        product={product}
+        actionType={actionType}
+        onConfirm={handleConfirmAction}
+      />
+
+      <ToastNotification 
+        visible={toastVisible}
+        message="Berhasil ditambahkan ke keranjang"
+        onHide={() => setToastVisible(false)}
       />
     </View>
   );

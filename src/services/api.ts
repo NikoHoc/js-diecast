@@ -81,5 +81,5 @@ export const getImageUrl = (path: string | null) => {
 
   const cleanPath = path.startsWith('/') ? path.substring(1) : path;
   
-  return `${BASE_URL}/uploads/${cleanPath}`;
+  return `${BASE_URL}/${cleanPath}`;
 };
