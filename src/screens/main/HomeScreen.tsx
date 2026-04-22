@@ -1,21 +1,27 @@
 import React from 'react';
 import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
 import HomeHeader from '@/components/HomeHeader';
-import { useBrands } from '@/hooks/useBrands';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import ProductCard from '@/components/ProductCard';
-import { useProducts } from '@/hooks/useProducts';
+import { useHomeStats } from '@/hooks/useStats';
+import BestSellerProductCard from '@/components/BestSellerProductCard';
 
 export default function HomeScreen() {
-    const navigation = useNavigation<BottomTabNavigationProp<any>>();
+  const navigation = useNavigation<BottomTabNavigationProp<any>>();
 
-  const { brands, loading } = useBrands();
-  const { products, loading: loadingProducts } = useProducts()
+  const { topBrands, topProducts, loading } = useHomeStats();
 
-  const popularBrands = brands.slice(0, 4);
-  const bestSellers = products.slice(0, 6);
+  const popularBrands = topBrands.slice(0, 8);
+
+  if (loading) {
+    return (
+      <View className="flex-1 items-center justify-center bg-white">
+        <ActivityIndicator size="large" color="#EF4444" />
+      </View>
+    );
+  }
 
   return (
     <View className="flex-1 bg-white">
@@ -23,9 +29,9 @@ export default function HomeScreen() {
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="p-4">
-          <Text className="text-lg font-bold text-gray-800 mb-3">Promo Bundling</Text>
-          <View className="h-48 bg-gray-100 rounded-2xl items-center justify-center border-dashed border-2 border-gray-300 mb-6">
-            <Text className="text-gray-400 font-medium">Paket bundling belum tersedia!</Text>
+          <Text className="mb-3 text-lg font-bold text-gray-800">Promo Bundling</Text>
+          <View className="mb-6 h-48 items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100">
+            <Text className="font-medium text-gray-400">Paket bundling belum tersedia!</Text>
           </View>
 
           <View className="flex-row justify-between items-center mb-3">
@@ -42,54 +48,54 @@ export default function HomeScreen() {
                 <Text className="text-gray-500 font-medium">Pabrikan belum tersedia!</Text>
               </View>
             ) : (
-              <View className="flex-row justify-between mb-2">
-                {popularBrands.map((brand) => (
-                  <TouchableOpacity 
-                    key={brand.id} 
-                    className="items-center w-16"
-                    onPress={() => {
-                      navigation.navigate('FactoryProduct', { 
-                        brandId: brand.id, 
-                        brandName: brand.name 
-                      });
-                    }}
-                  >
-                    <View className="w-16 h-16 bg-gray-50 rounded-2xl border border-gray-100 items-center justify-center mb-2 shadow-sm overflow-hidden">
-                      <ImageWithFallback 
-                        uri={brand.logo} 
-                        className="w-full h-full"
-                        resizeMode="contain"
-                        fallbackIcon="car-sport-outline"
-                      />
-                    </View>
-                    <Text className="text-xs font-medium text-gray-700 text-center">
-                      {brand.name}
-                    </Text>
-                  </TouchableOpacity>
+              <View className="flex-row flex-wrap mb-2">
+                {popularBrands.map((brand, index) => (
+                  <View key={`brand-${brand.id || 'x'}-${index}`} className="w-1/4 items-center mb-4">
+                    <TouchableOpacity 
+                      className="items-center w-full"
+                      onPress={() => {
+                        navigation.navigate('FactoryProduct' as any, { 
+                          brandId: brand.id, 
+                          brandName: brand.name 
+                        });
+                      }}
+                    >
+                      <View className="w-14 h-14 bg-gray-50 rounded-2xl border border-gray-100 items-center justify-center mb-2 shadow-sm overflow-hidden">
+                        <ImageWithFallback 
+                          uri={brand.logo} 
+                          className="w-10 h-10"
+                          resizeMode="contain"
+                          fallbackIcon="car-sport-outline"
+                        />
+                      </View>
+                      <Text className="text-[10px] font-medium text-gray-700 text-center px-1" numberOfLines={1}>
+                        {brand.name}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
                 ))}
               </View>
             )
           )}
 
-          <Text className="text-lg font-bold text-gray-800 mb-2">Diecast Popular</Text>
-          {loadingProducts ? (
+          <Text className="mb-2 text-lg font-bold text-gray-800">Diecast Popular</Text>
+          {loading ? (
             <ActivityIndicator size="small" color="#EF4444" className="my-10" />
-          ) : products.length === 0 ? (
+          ) : topProducts.length === 0 ? (
             <View className="py-10 items-center bg-gray-50 rounded-2xl border border-gray-100">
               <Text className="text-gray-400">Produk belum tersedia</Text>
             </View>
           ) : (
-            <View className="flex-row flex-wrap -mx-2">
-              {bestSellers.map((item) => (
-                <ProductCard 
-                  key={item.id}
+            <View className="flex-row flex-wrap ">
+              {topProducts.map((item, index) => (
+                <BestSellerProductCard 
+                  key={`product-${item.id || 'x'}-${index}`}
                   product={item}
                   onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
                 />
               ))}
             </View>
           )}
-
         </View>
       </ScrollView>
     </View>

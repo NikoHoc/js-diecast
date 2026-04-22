@@ -31,6 +31,12 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "package": "com.nikohoc.jsdiecastapp"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "4c32c509-c6a9-4932-9890-c937867986c4"
       }
     }
   }

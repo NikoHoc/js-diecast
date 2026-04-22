@@ -16,7 +16,7 @@ export function useBrands() {
       if (result.success) {
         const formattedBrands = result.data.map(brand => ({
           ...brand,
-          logo: getImageUrl(brand.logo) 
+          logo: brand.logo ? getImageUrl(`brand/${brand.logo}`) : getImageUrl(null)
         }));
         
         setBrands(formattedBrands);

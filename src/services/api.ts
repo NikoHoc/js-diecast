@@ -1,7 +1,20 @@
 import * as SecureStore from 'expo-secure-store';
 
-const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL; 
+export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL; 
 const API_KEY = process.env.EXPO_PUBLIC_API_KEY as string;
+
+export const getImageUrl = (path: string | null) => {
+  if (!path || path === '' || path.includes('noimage.jpg')) {
+    return `${BASE_URL}/image/noimage.jpg`;
+  }
+  
+  if (path.startsWith('http')) return path;
+
+  let cleanPath = path.startsWith('/') ? path.substring(1) : path;
+  cleanPath = cleanPath.replace('uploads/', ''); 
+  
+  return `${BASE_URL}/image/${cleanPath}`;
+};
 
 async function refreshToken(): Promise<boolean> {
   try {
@@ -72,14 +85,4 @@ export const api = {
   post: <T = any>(path: string, body: any) => api.request<T>('POST', path, body),
   put: <T = any>(path: string, body: any) => api.request<T>('PUT', path, body),
   delete: <T = any>(path: string) => api.request<T>('DELETE', path),
-};
-
-export const getImageUrl = (path: string | null) => {
-  if (!path) return null;
-  
-  if (path.startsWith('http')) return path;
-
-  const cleanPath = path.startsWith('/') ? path.substring(1) : path;
-  
-  return `${BASE_URL}/${cleanPath}`;
 };

@@ -21,7 +21,7 @@ export function useProducts(brandId?: number, searchQuery?: string) {
       if (result.success) {
         const formattedProducts = result.data.map((item) => ({
           ...item,
-          photo: getImageUrl(item.photo),
+          photo: getImageUrl(item.photo?.includes('noimage.jpg') ? 'noimage.jpg' : `product_master/${item.photo}`),
         }));
         setProducts(formattedProducts);
       }

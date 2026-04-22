@@ -93,7 +93,11 @@ export default function ProductDetailScreen() {
             scrollEventThrottle={16}>
             {images.map((img, index) => (
               <View key={index} style={{ width }}>
-                <ImageWithFallback uri={img} className="aspect-square w-full" resizeMode="cover" />
+                <ImageWithFallback 
+                  uri={img} 
+                  className="w-full h-full bg-white" 
+                  resizeMode="contain" 
+                />
               </View>
             ))}
           </ScrollView>

@@ -13,13 +13,18 @@ export default function ImageWithFallback({
   className, 
   ...props 
 }: ImageWithFallbackProps) {
+  const defaultImage = require('../../assets/images/coming-soon.jpg');
   const [hasError, setHasError] = useState(false);
 
-  if (!uri || hasError) {
+  const isNoImage = !uri || hasError || uri.includes('noimage.jpg');
+
+  if (isNoImage) {
     return (
-      <View className={`items-center justify-center bg-gray-100 ${className}`}>
-        <Ionicons name={fallbackIcon} size={28} color="#9CA3AF" />
-      </View>
+      <Image 
+        source={defaultImage}
+        className={className}
+        {...props} 
+      />
     );
   }
 
