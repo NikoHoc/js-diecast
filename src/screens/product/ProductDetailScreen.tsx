@@ -60,15 +60,15 @@ export default function ProductDetailScreen() {
   const images = [product.photo];
   const isOutOfStock = Number(product.stock) === 0;
 
-  // const isLoggedIn = false;
+  const isLoggedIn = false;
 
-  // const handleActionWithAuth = (actionName: string) => {
-  //   if (!isLoggedIn) {
-  //     setModalVisible(true);
-  //   } else {
-  //     console.log('Melakukan aksi:', actionName);
-  //   }
-  // };
+  const handleActionWithAuth = (actionName: string) => {
+    if (!isLoggedIn) {
+      setModalVisible(true);
+    } else {
+      console.log('Melakukan aksi:', actionName);
+    }
+  };
 
   return (
     <View className="flex-1 bg-white">
@@ -159,7 +159,7 @@ export default function ProductDetailScreen() {
             className="rounded-lg border border-red-500 px-4 py-1.5"
             onPress={() =>
               navigation.navigate('FactoryProduct', {
-                brandId: product.brand_id,
+                brandId: product.brand?.id,
                 brandName: product.brand?.name,
               })
             }>
@@ -183,6 +183,7 @@ export default function ProductDetailScreen() {
           className={`flex-1 h-12 items-center justify-center rounded-xl border ${isOutOfStock ? 'border-gray-200 bg-gray-50' : 'border-red-500 bg-white'}`}
           disabled={isOutOfStock}
           onPress={() => openActionModal('buy')}
+          // onPress={() => handleActionWithAuth('buy')}
         >
           <Text className={`font-bold ${isOutOfStock ? 'text-gray-300' : 'text-red-500'}`}>
             Beli Langsung

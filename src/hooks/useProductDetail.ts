@@ -1,46 +1,40 @@
 import { useState, useEffect, useCallback } from 'react';
 import { api, getImageUrl } from '@/services/api';
-import { BaseResponse } from '@/types';
+import { Product } from '@/types';
 
 export function useProductDetail(productId: number) {
-  const [product, setProduct] = useState<any>(null);
+  const [product, setProduct] = useState<Product | undefined>(undefined);
   const [loading, setLoading] = useState(true);
 
   const loadProductDetail = useCallback(async () => {
+    if (!productId) return;
+
     setLoading(true);
     try {
-      const result = await api.get<BaseResponse<any>>(`/composite/product-detail?id=${productId}`);
-      if (result.success && result.data) {
-        const data = result.data;
-        
-        if (data.photo && !data.photo.startsWith('http')) {
-          let cleanMain = data.photo.replace('uploads/', '');
-          cleanMain = cleanMain.includes('noimage.jpg') ? 'noimage.jpg' : `product_master/${cleanMain}`;
-          data.photo = getImageUrl(cleanMain);
-        } else {
-          data.photo = getImageUrl(data.photo);
-        }
+      const params = new URLSearchParams();
+      params.append('id', String(productId)); 
+      
+      const endpoint = `/catalog/products?${params.toString()}`;
+      const result = await api.get<any>(endpoint);
 
-        let galleryUrls: string[] = [];
-        if (data.product_master) {
-          const pm = data.product_master;
-          const pmPhotos = [pm.photo1, pm.photo2, pm.photo3, pm.photo4, pm.photo5];
+      if (result?.success && result?.data) {
+        const item = result.data;
+
+        const formattedProduct: Product = {
+          ...item,
+          id: Number(item.id),
+          selling_price: Number(item.selling_price),
+          stock: Number(item.stock),
           
-          pmPhotos.forEach(p => {
-            if (p && p !== '' && !p.includes('noimage.jpg')) {
-              const cleanP = p.replace('uploads/', '');
-              galleryUrls.push(getImageUrl(`product_master/${cleanP}`));
-            }
-          });
-        }
+          photo: getImageUrl(item.photo),
+          brand: {
+            id: item.brand_id ? Number(item.brand_id) : 0,
+            name: item.brand_name || 'Pabrikan'
+          },
+          description: item.description || item.notes || `Diecast ${item.name} dengan detail tingkat tinggi.`
+        };
         
-        if (galleryUrls.length === 0) {
-          galleryUrls.push(data.photo);
-        }
-        
-        data.photos = galleryUrls; 
-
-        setProduct(data);
+        setProduct(formattedProduct);
       }
     } catch (error) {
       console.log('Error fetch detail:', error);
@@ -50,8 +44,8 @@ export function useProductDetail(productId: number) {
   }, [productId]);
 
   useEffect(() => {
-    if (productId) loadProductDetail();
-  }, [productId, loadProductDetail]);
+    loadProductDetail();
+  }, [loadProductDetail]);
 
   return { product, loading };
 }

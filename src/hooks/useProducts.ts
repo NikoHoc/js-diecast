@@ -14,17 +14,20 @@ export function useProducts(brandId?: number, searchQuery?: string) {
       if (brandId) params.append('brand_id', String(brandId));
       if (searchQuery) params.append('search', searchQuery);
 
-      const endpoint = `/product${params.toString() ? `?${params.toString()}` : ''}`;
+      const endpoint = `/catalog/products${params.toString() ? `?${params.toString()}` : ''}`;
 
       const result = await api.get<BaseResponse<Product[]>>(endpoint);
 
-      if (result.success) {
-        const formattedProducts = result.data.map((item) => ({
-          ...item,
-          photo: getImageUrl(item.photo?.includes('noimage.jpg') ? 'noimage.jpg' : `product_master/${item.photo}`),
-        }));
-        setProducts(formattedProducts);
-      }
+      const formattedProducts = result.data.map((item: any) => ({
+        ...item,
+        photo: getImageUrl(item.photo),
+        brand: {
+          id: item.brand?.id || item.brand_id || 0,
+          name: item.brand?.name || item.brand_name || 'Pabrikan',
+        },
+      }));
+      setProducts(formattedProducts);
+      
     } catch (error) {
       console.log('Error fetch products:', error);
     } finally {

@@ -1,3 +1,5 @@
+export const PRODUCT_FILTER_CATEGORIES = ['Semua', 'Ready', 'PO', 'Paket'];
+
 export interface BaseResponse<T> {
   success: boolean;
   data: T;
@@ -25,3 +27,17 @@ export interface Product {
     logo?: string | null;
   };
 }
+
+export interface MembershipTier {
+  id: string;
+  name: string;
+  level: string;
+  icon: string;
+  iconColor: string;
+  bgColor: string;
+  borderColor: string;
+  multiplier: string;
+  minTransaction: string;
+  dpRule: string;
+  description: string; 
+};

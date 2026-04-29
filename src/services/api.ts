@@ -1,11 +1,49 @@
+import axios from 'axios';
 import * as SecureStore from 'expo-secure-store';
 
-export const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL; 
-const API_KEY = process.env.EXPO_PUBLIC_API_KEY as string;
+const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL; 
+
+const axiosInstance = axios.create({
+  baseURL: BASE_URL,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+axiosInstance.interceptors.request.use(async (config) => {
+  try {
+    const apiKey = await SecureStore.getItemAsync('user_api_key');
+    if (apiKey) {
+      config.headers['X-Api-Key'] = apiKey;
+    }
+  } catch (error) {
+    console.error('Gagal mengambil API Key dari SecureStore:', error);
+  }
+  return config;
+});
+
+export const api = {
+  get: async <T = any>(url: string) => {
+    const response = await axiosInstance.get<T>(url);
+    return response.data;
+  },
+  post: async <T = any>(url: string, data?: any) => {
+    const response = await axiosInstance.post<T>(url, data);
+    return response.data;
+  },
+  put: async <T = any>(url: string, data?: any) => {
+    const response = await axiosInstance.put<T>(url, data);
+    return response.data;
+  },
+  delete: async <T = any>(url: string) => {
+    const response = await axiosInstance.delete<T>(url);
+    return response.data;
+  }
+};
 
 export const getImageUrl = (path: string | null) => {
   if (!path || path === '' || path.includes('noimage.jpg')) {
-    return `${BASE_URL}/image/noimage.jpg`;
+    return null;
   }
   
   if (path.startsWith('http')) return path;
@@ -14,75 +52,4 @@ export const getImageUrl = (path: string | null) => {
   cleanPath = cleanPath.replace('uploads/', ''); 
   
   return `${BASE_URL}/image/${cleanPath}`;
-};
-
-async function refreshToken(): Promise<boolean> {
-  try {
-    const refresh = await SecureStore.getItemAsync('refresh_token');
-    if (!refresh) return false;
-
-    const res = await fetch(`${BASE_URL}/auth/refresh`, {
-      method: 'POST',
-      headers: {
-        'X-API-Key': API_KEY,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ refresh_token: refresh }),
-    });
-
-    const data = await res.json();
-    if (data.success) {
-      await SecureStore.setItemAsync('access_token', data.data.tokens.access_token);
-      await SecureStore.setItemAsync('refresh_token', data.data.tokens.refresh_token);
-      return true;
-    }
-    return false;
-  } catch (error) {
-    console.error('Gagal melakukan refresh token:', error);
-    return false;
-  }
-}
-
-export const api = {
-  async request<T = any>(method: string, path: string, body: any = null): Promise<T> {
-    let token = await SecureStore.getItemAsync('access_token');
-    
-    const headers: Record<string, string> = {
-      'X-API-Key': API_KEY,
-      'Content-Type': 'application/json',
-    };
-
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`;
-    }
-
-    const options: RequestInit = { method, headers };
-    if (body) {
-      options.body = JSON.stringify(body);
-    }
-
-    try {
-      let res = await fetch(`${BASE_URL}${path}`, options);
-
-      if (res.status === 401 && token) {
-        const refreshed = await refreshToken();
-        if (refreshed) {
-          token = await SecureStore.getItemAsync('access_token');
-          headers['Authorization'] = `Bearer ${token}`;
-          options.headers = headers;
-          res = await fetch(`${BASE_URL}${path}`, options);
-        }
-      }
-
-      return await res.json();
-    } catch (error) {
-      console.error("API Request Error:", error);
-      throw error;
-    }
-  },
-
-  get: <T = any>(path: string) => api.request<T>('GET', path),
-  post: <T = any>(path: string, body: any) => api.request<T>('POST', path, body),
-  put: <T = any>(path: string, body: any) => api.request<T>('PUT', path, body),
-  delete: <T = any>(path: string) => api.request<T>('DELETE', path),
 };

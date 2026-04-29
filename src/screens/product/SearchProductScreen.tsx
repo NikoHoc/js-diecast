@@ -1,97 +1,183 @@
-import React, { useState } from 'react';
-import { View, Text, FlatList, TouchableOpacity, ActivityIndicator, TextInput } from 'react-native';
+import React, { useState, useEffect, act } from 'react';
+import { View, Text, TextInput, TouchableOpacity, ScrollView, ActivityIndicator } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation, useRoute } from '@react-navigation/native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { RouteProp, useNavigation, useRoute, NavigationProp } from '@react-navigation/native';
-import { RootStackParamList } from '@/types/navigation';
+import { api, getImageUrl } from '@/services/api';
 import ProductCard from '@/components/ProductCard';
-import { useProducts } from '@/hooks/useProducts';
-import { Product } from '@/types';
+import { PRODUCT_FILTER_CATEGORIES } from '@/types';
 import CartButton from '@/components/CartButton';
 
 export default function SearchProductScreen() {
   const insets = useSafeAreaInsets();
-  const navigation = useNavigation<NavigationProp<RootStackParamList>>();
-  const route = useRoute<RouteProp<RootStackParamList, 'SearchProduct'>>();
+  const navigation = useNavigation<any>();
+  const route = useRoute<any>();
 
-  const { searchQuery: initialQuery } = route.params;
-
+  const initialQuery = route.params?.searchQuery || ''; 
   const [searchInput, setSearchInput] = useState(initialQuery);
-  const [currentQuery, setCurrentQuery] = useState(initialQuery);
+  const [activeFilter, setActiveFilter] = useState('Semua');
+  const [results, setResults] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
 
-  const { products, loading } = useProducts(undefined, currentQuery);
+  useEffect(() => {
+    handleSearch(initialQuery, activeFilter);
+  }, [initialQuery, activeFilter]);
 
-  const handleSearchAgain = () => {
-    if (searchInput.trim().length > 0) {
-      setCurrentQuery(searchInput.trim());
+  const handleSearch = async (query: string, filter: string) => {
+    if (!query.trim() && filter === 'Semua') return;
+    
+    setLoading(true);
+    let combinedData: any[] = [];
+    const q = query.toLowerCase();
+
+    // product
+    if (filter === 'Semua' || filter === 'Ready') {
+      try {
+        const res = await api.get(`/catalog/products?search=${query}`);
+        // const res = await api.get(`/product?search=${query}`);
+        if (res?.success && res.data) {
+          const mappedReady = res.data.map((p: any) => ({
+            id: `ready-${p.id}`,
+            type: 'ready',
+            name: p.name,
+            photo: getImageUrl(p.photo),
+            selling_price: p.selling_price,
+            stock: p.stock,
+            brand: { name: p.brand_name || 'Pabrikan' }
+          }));
+          combinedData = [...combinedData, ...mappedReady];
+        }
+      } catch (error) {
+        console.log("❌ Error di API Produk Ready:", error);
+      }
     }
+
+    // po_rooms
+    if (filter === 'Semua' || filter === 'PO') {
+      try {
+        const res = await api.get(`/catalog/po_rooms`);
+        if (res?.success && res.data) {
+          const filtered = res.data.filter((po: any) => po.name.toLowerCase().includes(q));
+          const mappedPO = filtered.map((po: any) => ({
+            id: `po-${po.id}`,
+            type: 'po',
+            name: po.name,
+            photo: getImageUrl(po.photo), 
+            selling_price: po.po_selling_price, 
+            stock: 'PRE-ORDER', 
+            brand: { name: po.brand_name || 'PO Room' }
+          }));
+          combinedData = [...combinedData, ...mappedPO];
+        }
+      } catch (error) {
+        console.log("❌ Error di API PO Room:", error);
+      }
+    }
+
+    // package
+    if (filter === 'Semua' || filter === 'Paket') {
+      try {
+        const res = await api.get(`/catalog/packages`);
+        if (res?.success && res.data) {
+          const filtered = res.data.filter((pkg: any) => pkg.name.toLowerCase().includes(q));
+          const mappedPkg = filtered.map((pkg: any) => ({
+            id: `paket-${pkg.id}`,
+            type: 'paket',
+            name: pkg.name,
+            photo: getImageUrl(pkg.photo),
+            selling_price: pkg.price, 
+            stock: 'PAKET BUNDLING',
+            brand: { name: 'Promo' }
+          }));
+          combinedData = [...combinedData, ...mappedPkg];
+        }
+      } catch (error) {
+        console.log("❌ Error di API Paket Bundling:", error);
+      }
+    }
+
+    // Terakhir, simpan data yang berhasil digabung ke State
+    setResults(combinedData);
+    setLoading(false);
   };
 
-  const renderProductCard = ({ item }: { item: Product }) => (
-    <ProductCard
-      key={item.id}
-      product={item}
-      onPress={() => navigation.navigate('ProductDetail', { productId: item.id })}
-    />
-  );
+  const onSubmitSearch = () => {
+    handleSearch(searchInput, activeFilter);
+  };
+
+  const onChangeFilter = (newFilter: string) => {
+    setActiveFilter(newFilter);
+    handleSearch(searchInput, newFilter);
+  };
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
-      <View className="flex-row items-center border-b border-gray-100 px-4 py-3">
-        <TouchableOpacity onPress={() => navigation.goBack()}>
-          <Ionicons name="arrow-back" size={24} color="black" />
+      <View className="flex-row items-center px-4 py-3 border-b border-gray-100 space-x-3">
+        <TouchableOpacity onPress={() => navigation.goBack()} className="p-2 -ml-2">
+          <Ionicons name="arrow-back" size={24} color="#374151" />
         </TouchableOpacity>
-        <View className="flex-1 flex-row items-center bg-gray-100 rounded-xl px-4 py-3">
-          <Ionicons name="search" size={18} color="gray" />
+        
+        <View className="flex-1 flex-row items-center bg-gray-100 rounded-xl px-3 py-2">
+          <Ionicons name="search" size={20} color="gray" />
           <TextInput 
-            placeholder="Cari lagi..." 
             className="flex-1 ml-2 text-gray-800"
-            style={{ textAlignVertical: 'center', includeFontPadding: false }}
+            placeholder="Cari diecast..."
             value={searchInput}
             onChangeText={setSearchInput}
+            onSubmitEditing={onSubmitSearch}
             returnKeyType="search"
-            onSubmitEditing={handleSearchAgain}
           />
           {searchInput.length > 0 && (
             <TouchableOpacity onPress={() => setSearchInput('')}>
-              <Ionicons name="close-circle" size={18} color="gray" />
+              <Ionicons name="close-circle" size={20} color="gray" />
             </TouchableOpacity>
           )}
         </View>
         <CartButton />
       </View>
 
-      {!loading && (
-        <View className="px-4 py-3 bg-gray-50/50">
-          <Text className="text-xs font-semibold text-gray-500 uppercase tracking-tight">
-            Menampilkan hasil untuk &quot;{currentQuery}&quot; ({products.length})
-          </Text>
-        </View>
-      )}
-
-      {loading ? (
-        <View className="flex-1 items-center justify-center">
-          <ActivityIndicator size="large" color="#EF4444" />
-        </View>
-      ) : (
-        <FlatList
-          data={products}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={renderProductCard}
-          numColumns={2}
-          contentContainerStyle={{ padding: 8, paddingBottom: 20 }}
-          showsVerticalScrollIndicator={false}
-          ListEmptyComponent={
-            <View className="items-center justify-center py-20">
-              <Ionicons name="search-outline" size={60} color="#D1D5DB" />
-              <Text className="mt-4 text-base font-medium text-gray-500">
-                Produk &quot;{currentQuery}&quot; tidak ditemukan
+      <View className="flex-row items-center px-4 py-3 border-b border-gray-50">
+        <ScrollView horizontal showsHorizontalScrollIndicator={false} className="flex-1">
+          {PRODUCT_FILTER_CATEGORIES.map((cat) => (
+            <TouchableOpacity 
+              key={cat}
+              onPress={() => onChangeFilter(cat)}
+              className={`mr-2 px-4 py-1.5 rounded-full border ${activeFilter === cat ? 'bg-red-50 border-red-500' : 'bg-white border-gray-200'}`}
+            >
+              <Text className={`text-xs font-bold ${activeFilter === cat ? 'text-red-500' : 'text-gray-500'}`}>
+                {cat}
               </Text>
-              <Text className="mt-1 text-sm text-gray-400">Coba gunakan kata kunci lain</Text>
-            </View>
-          }
-        />
-      )}
+            </TouchableOpacity>
+          ))}
+        </ScrollView>
+        <TouchableOpacity className="ml-2 flex-row items-center bg-gray-200 px-3 py-1.5 rounded-full">
+          <Ionicons name="options" size={14} color="black" />
+          <Text className="text-xs font-bold ml-1">Pabrikan</Text>
+        </TouchableOpacity>
+      </View>
+
+      <ScrollView className="flex-1 px-2 pt-4" showsVerticalScrollIndicator={false}>
+        {loading ? (
+          <ActivityIndicator size="large" color="#EF4444" className="mt-10" />
+        ) : results.length === 0 ? (
+          <View className="items-center justify-center mt-20">
+            <Ionicons name="search-outline" size={60} color="#E5E7EB" />
+            <Text className="text-gray-500 font-medium mt-4">Produk tidak ditemukan</Text>
+          </View>
+        ) : (
+          <View className="flex-row flex-wrap">
+            {results.map((item) => (
+              <ProductCard 
+                key={item.id}
+                product={item}
+                onPress={() => console.log("Pergi ke detail:", item.id)}
+              />
+            ))}
+          </View>
+        )}
+        <View className="h-10" />
+      </ScrollView>
+
     </View>
   );
 }

@@ -1,19 +1,24 @@
 import React from 'react';
-import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, ActivityIndicator, Image, Dimensions, FlatList } from 'react-native';
 import HomeHeader from '@/components/HomeHeader';
 import { useNavigation } from '@react-navigation/native';
 import { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import ImageWithFallback from '@/components/ImageWithFallback';
-import ProductCard from '@/components/ProductCard';
 import { useHomeStats } from '@/hooks/useStats';
 import BestSellerProductCard from '@/components/BestSellerProductCard';
+import { usePackages } from '@/hooks/usePackages';
+
+const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const navigation = useNavigation<BottomTabNavigationProp<any>>();
 
+  const { packages, loading: loadingPackage } = usePackages();
   const { topBrands, topProducts, loading } = useHomeStats();
 
   const popularBrands = topBrands.slice(0, 8);
+
+  const comingSoonImage = require('../../../assets/images/coming-soon.jpg');
 
   if (loading) {
     return (
@@ -29,9 +34,26 @@ export default function HomeScreen() {
 
       <ScrollView className="flex-1" showsVerticalScrollIndicator={false}>
         <View className="p-4">
-          <Text className="mb-3 text-lg font-bold text-gray-800">Promo Bundling</Text>
-          <View className="mb-6 h-48 items-center justify-center rounded-2xl border-2 border-dashed border-gray-300 bg-gray-100">
-            <Text className="font-medium text-gray-400">Paket bundling belum tersedia!</Text>
+          <Text className="mb-3 text-lg font-bold text-gray-800">Paket Bundling</Text>
+          <View className="mb-6 h-48 rounded-2xl overflow-hidden bg-gray-100 border-2 border-red-400">
+            {loadingPackage ? (
+              <ActivityIndicator color="#EF4444" />
+            ) : packages.length > 0 ? (
+              <FlatList 
+                data={packages}
+                horizontal
+                pagingEnabled
+                renderItem={({ item }) => (
+                  <Image source={{ uri: item.photo }} style={{ width: width - 32, height: 160 }} />
+                )}
+              />
+            ) : (
+              <Image 
+                source={comingSoonImage} 
+                style={{ width: width - 32, height: 160 }}
+                resizeMode="cover"
+              />
+            )}
           </View>
 
           <View className="flex-row justify-between items-center mb-3">
@@ -86,7 +108,7 @@ export default function HomeScreen() {
               <Text className="text-gray-400">Produk belum tersedia</Text>
             </View>
           ) : (
-            <View className="flex-row flex-wrap ">
+            <View className="flex-row flex-wrap -mx-2">
               {topProducts.map((item, index) => (
                 <BestSellerProductCard 
                   key={`product-${item.id || 'x'}-${index}`}
