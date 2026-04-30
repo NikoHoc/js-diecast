@@ -6,6 +6,7 @@ export function useHomeStats() {
   const [topBrands, setTopBrands] = useState<Brand[]>([]);
   const [topProducts, setTopProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     loadStats();
@@ -14,6 +15,7 @@ export function useHomeStats() {
   const loadStats = async () => {
     try {
       setLoading(true);
+      setError(null);
       const [brandsRes, productsRes] = await Promise.all([
         api.get<BaseResponse<any>>('/stats/top-brands?days=30&limit=10'),
         api.get<BaseResponse<any>>('/stats/top-products?days=30&limit=10')
@@ -42,12 +44,12 @@ export function useHomeStats() {
         }));
         setTopProducts(formattedProducts);
       }
-    } catch (error) {
-      console.error('Gagal memuat statistik:', error);
+    } catch (err: any) {
+      setError('Gagal memuat data statistik' || err.message);
     } finally {
       setLoading(false);
     }
   };
 
-  return { topBrands, topProducts, loading };
+  return { topBrands, topProducts, loading, error, refetch: loadStats };
 }

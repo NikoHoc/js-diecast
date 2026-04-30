@@ -1,51 +1,37 @@
-import { useState, useEffect, useCallback } from 'react';
-import { api, getImageUrl } from '@/services/api';
+// src/hooks/useProductDetail.ts
+import { useState, useEffect } from 'react';
+import { catalogService } from '@/services/catalog';
 import { Product } from '@/types';
 
-export function useProductDetail(productId: number) {
-  const [product, setProduct] = useState<Product | undefined>(undefined);
+export const useProductDetail = (id: string | number) => {
+  const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadProductDetail = useCallback(async () => {
-    if (!productId) return;
-
-    setLoading(true);
+  const fetchDetail = async () => {
+    if (!id) return;
+    
     try {
-      const params = new URLSearchParams();
-      params.append('id', String(productId)); 
+      setLoading(true);
+      setError(null);
       
-      const endpoint = `/catalog/products?${params.toString()}`;
-      const result = await api.get<any>(endpoint);
-
-      if (result?.success && result?.data) {
-        const item = result.data;
-
-        const formattedProduct: Product = {
-          ...item,
-          id: Number(item.id),
-          selling_price: Number(item.selling_price),
-          stock: Number(item.stock),
-          
-          photo: getImageUrl(item.photo),
-          brand: {
-            id: item.brand_id ? Number(item.brand_id) : 0,
-            name: item.brand_name || 'Pabrikan'
-          },
-          description: item.description || item.notes || `Diecast ${item.name} dengan detail tingkat tinggi.`
-        };
-        
-        setProduct(formattedProduct);
+      const result = await catalogService.getProductDetail(id);
+      
+      if (result.success && result.data) {
+        setProduct(result.data);
+      } else {
+        setError(result.message || 'Gagal memuat detail produk');
       }
-    } catch (error) {
-      console.log('Error fetch detail:', error);
+    } catch (err: any) {
+      setError(err.message || 'Terjadi kesalahan jaringan');
     } finally {
       setLoading(false);
     }
-  }, [productId]);
+  };
 
   useEffect(() => {
-    loadProductDetail();
-  }, [loadProductDetail]);
+    fetchDetail();
+  }, [id]);
 
-  return { product, loading };
-}
+  return { product, loading, error, refetch: fetchDetail };
+};

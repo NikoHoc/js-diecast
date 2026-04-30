@@ -33,17 +33,63 @@ export interface Brand {
   logo: string | null;
 }
 
+export interface ProductStorage {
+  stock: string | number;
+  storage_name: string;
+}
+
 export interface Product {
-  id: number;
+  id: string | number;
+  code?: string;
   name: string;
-  selling_price: number;
+  selling_price: string | number;
+  stock: string | number;
   photo: string | null;
-  stock: number;
-  brand?: {
-    id: number;
-    name: string;
-    logo?: string | null;
-  };
+  is_po?: string | number;
+  po_status?: string | null;
+  brand_name?: string;
+  group_name?: string;
+  
+  // Field get detail product
+  product_master_id?: string | number;
+  product_group_id?: string | number;
+  brand_id?: string | number;
+  description?: string | null;
+  po_selling_price?: string | number;
+  ready_selling_price?: string | number;
+  master_name?: string;
+  master_photo1?: string | null;
+  master_photo2?: string | null;
+  storages?: ProductStorage[];
+}
+
+export interface PackageItem {
+  id: string;
+  package_id: string;
+  product_id: string;
+  quantity: string;
+  percentage_discount?: string;
+  product_name: string;
+  code?: string;
+  selling_price: string;
+  stock: string;
+  photo: string | null;
+  stock_sufficient?: boolean;
+}
+
+export interface Package {
+  id: string | number;
+  uid: string;
+  name: string;
+  price: string | number;
+  total_discount?: string | number;
+  stock_quantity: string | number;
+  stock_sold?: string | number;
+  image: string | null;
+  is_active: string | number;
+  stock_available?: string | number;
+  available?: boolean;
+  items?: PackageItem[];
 }
 
 export interface MembershipTier {

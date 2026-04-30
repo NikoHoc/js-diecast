@@ -1,43 +1,37 @@
-import { useState, useEffect, useCallback } from 'react';
-import { api, getImageUrl } from '@/services/api';
-import { BaseResponse, Product } from '@/types';
+import { useState, useEffect } from 'react';
+import { catalogService } from '@/services/catalog';
+import { Product } from '@/types';
 
-export function useProducts(brandId?: number, searchQuery?: string) {
+interface ProductFilters {
+  category?: string;
+  brand_id?: number | string;
+  search?: string;
+}
+
+export const useProducts = (filters?: ProductFilters) => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadProducts = useCallback(async () => {
-    setLoading(true);
+  const fetchProducts = async () => {
     try {
-      const params = new URLSearchParams();
-
-      if (brandId) params.append('brand_id', String(brandId));
-      if (searchQuery) params.append('search', searchQuery);
-
-      const endpoint = `/catalog/products${params.toString() ? `?${params.toString()}` : ''}`;
-
-      const result = await api.get<BaseResponse<Product[]>>(endpoint);
-
-      const formattedProducts = result.data.map((item: any) => ({
-        ...item,
-        photo: getImageUrl(item.photo),
-        brand: {
-          id: item.brand?.id || item.brand_id || 0,
-          name: item.brand?.name || item.brand_name || 'Pabrikan',
-        },
-      }));
-      setProducts(formattedProducts);
-      
-    } catch (error) {
-      console.log('Error fetch products:', error);
+      setLoading(true);
+      const result = await catalogService.getProducts(filters);
+      if (result.success) {
+        setProducts(result.data);
+      } else {
+        setError(result.message || 'Gagal memuat produk');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Terjadi kesalahan jaringan');
     } finally {
       setLoading(false);
     }
-  }, [brandId, searchQuery]);
+  };
 
   useEffect(() => {
-    loadProducts();
-  }, [loadProducts]);
+    fetchProducts();
+  }, [JSON.stringify(filters)]);
 
-  return { products, loading };
-}
+  return { products, loading, error, refetch: fetchProducts };
+};

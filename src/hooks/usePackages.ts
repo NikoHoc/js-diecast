@@ -1,32 +1,31 @@
-import { useState, useEffect, useCallback } from 'react';
-import { api, getImageUrl } from '@/services/api';
+import { useState, useEffect } from 'react';
+import { catalogService } from '@/services/catalog';
+import { Package } from '@/types';
 
-export function usePackages() {
-  const [packages, setPackages] = useState<any[]>([]);
+export const usePackages = (searchQuery?: string) => {
+  const [packages, setPackages] = useState<Package[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const loadPackages = useCallback(async () => {
-    setLoading(true);
+  const fetchPackages = async () => {
     try {
-      const result = await api.get<any>('/catalog/packages');
-
-      if (result?.success && Array.isArray(result?.data)) {
-        const formatted = result.data.map((item: any) => ({
-          ...item,
-          photo: getImageUrl(item.photo),
-        }));
-        setPackages(formatted);
+      setLoading(true);
+      const result = await catalogService.getPackages({ search: searchQuery });
+      if (result.success) {
+        setPackages(result.data);
+      } else {
+        setError(result.message || 'Gagal memuat paket');
       }
-    } catch (error) {
-      console.log('Error fetch packages:', error);
+    } catch (err: any) {
+      setError(err.message || 'Terjadi kesalahan jaringan');
     } finally {
       setLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    loadPackages();
-  }, [loadPackages]);
+    fetchPackages();
+  }, [searchQuery]);
 
-  return { packages, loading, refetch: loadPackages };
-}
+  return { packages, loading, error, refetch: fetchPackages };
+};
