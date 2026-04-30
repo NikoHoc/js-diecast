@@ -8,6 +8,24 @@ export interface BaseResponse<T> {
   meta?: any;
 }
 
+export type User = {
+  id: string | number;
+  phone: string;
+  store_name: string;
+  name?: string;
+  membership_tier?: number;
+  total_point?: number;
+};
+
+export type AuthContextType = {
+  user: User | null;
+  isLoading: boolean;
+  isLoggedIn: boolean;
+  login: (token: string, userData: User) => Promise<void>;
+  logout: () => Promise<void>;
+  checkAuth: () => Promise<void>;
+};
+
 export interface Brand {
   id: number;
   uid: string;

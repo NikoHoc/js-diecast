@@ -8,6 +8,8 @@ import SearchProductScreen from '@/screens/product/SearchProductScreen';
 import LoginScreen from '@/screens/auth/LoginScreen';
 import RegisterScreen from '@/screens/auth/RegisterScreen';
 import CartScreen from '@/screens/cart/CartScreen';
+import VerifyOtpScreen from '@/screens/auth/VerifyOtpScreen';
+import SuccessRegisterScreen from '@/screens/auth/SuccessRegisterScreen';
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
@@ -21,6 +23,8 @@ export default function RootNavigator() {
       <Stack.Screen name="SearchProduct" component={SearchProductScreen} />
       <Stack.Screen name="Login" component={LoginScreen} />
       <Stack.Screen name="Register" component={RegisterScreen} />
+      <Stack.Screen name="VerifyOtp" component={VerifyOtpScreen} />
+      <Stack.Screen name="SuccessRegister" component={SuccessRegisterScreen} />
       <Stack.Screen name="Cart" component={CartScreen} />
     </Stack.Navigator>
   );

@@ -5,5 +5,7 @@ export type RootStackParamList = {
   SearchProduct: { searchQuery: string };
   Login: undefined; 
   Register: undefined;
+  VerifyOtp: { phone: string };
+  SuccessRegister: { apiKey: string; customer: any };
   Cart: undefined;
 };

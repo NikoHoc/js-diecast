@@ -1,66 +1,57 @@
-import React, { createContext, useState, useEffect, useContext } from 'react';
+import React, { createContext, useState, useContext, useEffect, ReactNode } from 'react';
 import * as SecureStore from 'expo-secure-store';
+import { api } from '@/services/api';
+import { User, AuthContextType } from '@/types';
 
-export interface User {
-  name: string;
-  phone: string;
-  store_name?: string;
-  address?: string
-}
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-interface AuthContextData {
-  user: User | null;
-  isLoading: boolean;
-  isLoggedIn: boolean;
-  login: (userData: User, accessToken: string, refreshToken: string) => Promise<void>;
-  logout: () => Promise<void>;
-}
-
-export const AuthContext = createContext<AuthContextData>({} as AuthContextData);
-
-export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    checkInitialLogin();
-  }, []);
-
-  const checkInitialLogin = async () => {
+  const checkAuth = async () => {
+    setIsLoading(true);
     try {
-      const dummyUser: User = {
-        name: "Diecaster Pro",
-        phone: "081234567890"
-      };
-      setUser(dummyUser);
+      const token = await SecureStore.getItemAsync('api_key');
+      const userDataStr = await SecureStore.getItemAsync('user_data');
 
-      // const token = await SecureStore.getItemAsync('access_token');
-      // const savedUser = await SecureStore.getItemAsync('customer');
-
-      // if (token && savedUser) {
-      //   setUser(JSON.parse(savedUser));
-      // }
+      if (token && userDataStr) {
+        api.setAuthToken(token);
+        setUser(JSON.parse(userDataStr));
+      }
     } catch (error) {
-      console.error('Gagal mengecek status login:', error);
+      console.error('Gagal mengecek status auth:', error);
     } finally {
       setIsLoading(false);
     }
   };
 
-  const login = async (userData: User, accessToken: string, refreshToken: string) => {
-    await SecureStore.setItemAsync('access_token', accessToken);
-    await SecureStore.setItemAsync('refresh_token', refreshToken);
-    await SecureStore.setItemAsync('customer', JSON.stringify(userData));
-    
-    setUser(userData);
+  useEffect(() => {
+    checkAuth();
+  }, []);
+
+  const login = async (token: string, userData: User) => {
+    try {
+      await SecureStore.setItemAsync('api_key', token);
+      await SecureStore.setItemAsync('user_data', JSON.stringify(userData));
+
+      api.setAuthToken(token);
+
+      setUser(userData);
+    } catch (error) {
+      console.error('Gagal menyimpan sesi login:', error);
+    }
   };
 
   const logout = async () => {
-    await SecureStore.deleteItemAsync('access_token');
-    await SecureStore.deleteItemAsync('refresh_token');
-    await SecureStore.deleteItemAsync('customer');
-    
-    setUser(null);
+    try {
+      await SecureStore.deleteItemAsync('api_key');
+      await SecureStore.deleteItemAsync('user_data');
+      api.setAuthToken(null);
+      setUser(null);
+    } catch (error) {
+      console.error('Gagal menghapus sesi login:', error);
+    }
   };
 
   return (
@@ -69,11 +60,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       isLoading, 
       isLoggedIn: !!user,
       login, 
-      logout 
+      logout,
+      checkAuth 
     }}>
       {children}
     </AuthContext.Provider>
   );
 };
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth harus digunakan di dalam AuthProvider');
+  }
+  return context;
+};

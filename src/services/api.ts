@@ -1,44 +1,58 @@
-import axios from 'axios';
-import * as SecureStore from 'expo-secure-store';
-
 const BASE_URL = process.env.EXPO_PUBLIC_BASE_URL; 
 
-const axiosInstance = axios.create({
-  baseURL: BASE_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
-
-axiosInstance.interceptors.request.use(async (config) => {
-  try {
-    const apiKey = await SecureStore.getItemAsync('user_api_key');
-    if (apiKey) {
-      config.headers['X-Api-Key'] = apiKey;
-    }
-  } catch (error) {
-    console.error('Gagal mengambil API Key dari SecureStore:', error);
-  }
-  return config;
-});
+let currentAuthToken: string | null = null;
 
 export const api = {
-  get: async <T = any>(url: string) => {
-    const response = await axiosInstance.get<T>(url);
-    return response.data;
+  setAuthToken: (token: string | null) => {
+    currentAuthToken = token;
   },
-  post: async <T = any>(url: string, data?: any) => {
-    const response = await axiosInstance.post<T>(url, data);
-    return response.data;
+
+  getHeaders: () => {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+    };
+    
+    if (currentAuthToken) {
+      headers['X-Api-Key'] = currentAuthToken;
+    }
+    
+    return headers;
   },
-  put: async <T = any>(url: string, data?: any) => {
-    const response = await axiosInstance.put<T>(url, data);
-    return response.data;
+
+  get: async <T = any>(endpoint: string): Promise<T> => {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method: 'GET',
+      headers: api.getHeaders(),
+    });
+    return response.json();
   },
-  delete: async <T = any>(url: string) => {
-    const response = await axiosInstance.delete<T>(url);
-    return response.data;
-  }
+
+  post: async <T = any>(endpoint: string, data?: any): Promise<T> => {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method: 'POST',
+      headers: api.getHeaders(),
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    return response.json();
+  },
+
+  put: async <T = any>(endpoint: string, data?: any): Promise<T> => {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method: 'PUT',
+      headers: api.getHeaders(),
+      body: data ? JSON.stringify(data) : undefined,
+    });
+    return response.json();
+  },
+
+  delete: async <T = any>(endpoint: string): Promise<T> => {
+    const response = await fetch(`${BASE_URL}${endpoint}`, {
+      method: 'DELETE',
+      headers: api.getHeaders(),
+    });
+    return response.json();
+  },
 };
 
 export const getImageUrl = (path: string | null) => {
@@ -47,9 +61,6 @@ export const getImageUrl = (path: string | null) => {
   }
   
   if (path.startsWith('http')) return path;
-
-  let cleanPath = path.startsWith('/') ? path.substring(1) : path;
-  cleanPath = cleanPath.replace('uploads/', ''); 
   
-  return `${BASE_URL}/image/${cleanPath}`;
+  return `${BASE_URL}/${path}`;
 };
