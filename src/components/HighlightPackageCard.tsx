@@ -1,4 +1,3 @@
-// src/components/HighlightPackageCard.tsx
 import React from 'react';
 import { View, Text, TouchableOpacity, Image } from 'react-native';
 import ImageWithFallback from '@/components/ImageWithFallback';
@@ -19,10 +18,10 @@ export default function HighlightPackageCard({ pkg, onPress }: HighlightPackageC
       {/* Gambar Latar */}
       <View className="absolute inset-0 bg-gray-200">
         <Image 
-          source={require('../../assets/images/tes-paket-bundling-1.jpg')}
+          // source={require('../../assets/images/tes-paket-bundling-1.jpg')}
+          source={{ uri: 'https://rapidlogic.online/api/v1/image/package/b1dd642fc82d8bd6f3ae91b6e10ba007.jpg' }}
           className="w-full h-full"
           resizeMode="cover"
-        //   fallbackIcon="cube-outline"
         />
         {/* <ImageWithFallback 
           uri={pkg.image} 

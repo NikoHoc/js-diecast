@@ -47,7 +47,7 @@ export default function ProductCard({ product, onPress }: ProductCardProps) {
 
             <View className="mt-2 self-start bg-gray-100 px-2 py-1 rounded-md border border-gray-200">
               <Text className="text-[10px] text-gray-500 font-bold uppercase">
-                {product.brand?.name || 'Pabrikan'}
+                {product?.brand_name}
               </Text>
             </View>
           </View>

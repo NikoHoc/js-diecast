@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, TouchableOpacity } from 'react-native';
+import { View, Text, TouchableOpacity, Image } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import ImageWithFallback from '@/components/ImageWithFallback';
 import { formatRupiah } from '@/utils/formatters';
@@ -19,11 +19,16 @@ export default function PackageCard({ pkg, onPress }: PackageCardProps) {
     >
       {/* Gambar Full Width di atas */}
       <View className="w-full h-48 bg-gray-100">
-        <ImageWithFallback 
+        {/* <ImageWithFallback 
           uri={pkg.image} 
           className="w-full h-full"
           resizeMode="cover"
           fallbackIcon="cube-outline"
+        /> */}
+        <Image 
+          source={{ uri: 'https://rapidlogic.online/api/v1/image/package/b1dd642fc82d8bd6f3ae91b6e10ba007.jpg' }}
+          className="w-full h-full"
+          resizeMode="cover"
         />
         
         {/* Badge Stok Menipis */}

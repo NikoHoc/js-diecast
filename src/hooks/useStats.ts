@@ -45,7 +45,8 @@ export function useHomeStats() {
         setTopProducts(formattedProducts);
       }
     } catch (err: any) {
-      setError('Gagal memuat data statistik' || err.message);
+      setError('Gagal memuat data statistik');
+      console.log("error loading stats: ", err.message)
     } finally {
       setLoading(false);
     }

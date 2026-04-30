@@ -11,7 +11,9 @@ import HighlightPackageCard from '@/components/HighlightPackageCard';
 import { Ionicons } from '@expo/vector-icons';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-const CARD_WIDTH = SCREEN_WIDTH - 32; 
+const CARD_WIDTH = SCREEN_WIDTH - 32;
+const GAP = 16;
+const SNAP_INTERVAL = CARD_WIDTH + GAP;
 
 export default function HomeScreen() {
   const navigation = useNavigation<BottomTabNavigationProp<any>>();
@@ -73,7 +75,6 @@ export default function HomeScreen() {
             {packagesLoading ? (
               <ActivityIndicator size="large" color="#EF4444" className="my-10" />
             ) : packagesError ? (
-              // Tampilkan Error Khusus Paket
               <SectionError message={packagesError} onRetry={refetchPackages} />
             ) : packages.length === 0 ? (
               <View className="items-center justify-center py-6 bg-gray-50 rounded-2xl border border-gray-100">
@@ -85,20 +86,21 @@ export default function HomeScreen() {
                   ref={flatListRef}
                   data={packages}
                   horizontal
-                  pagingEnabled
+                  snapToInterval={SNAP_INTERVAL}
+                  decelerationRate="fast"
                   showsHorizontalScrollIndicator={false}
-                  keyExtractor={(item) => item.id.toString()}
+                  keyExtractor={(item) => item.id.toString()}                  
                   getItemLayout={(_, index) => ({
-                    length: CARD_WIDTH,
-                    offset: CARD_WIDTH * index,
+                    length: SNAP_INTERVAL,
+                    offset: SNAP_INTERVAL * index,
                     index,
                   })}
                   onMomentumScrollEnd={(event) => {
-                    const newIndex = Math.round(event.nativeEvent.contentOffset.x / CARD_WIDTH);
+                    const newIndex = Math.round(event.nativeEvent.contentOffset.x / SNAP_INTERVAL);
                     setCurrentIndex(newIndex);
                   }}
                   renderItem={({ item }) => (
-                    <View style={{ width: CARD_WIDTH }}>
+                    <View style={{ width: CARD_WIDTH, marginRight: GAP }}>
                       <HighlightPackageCard 
                         pkg={item}
                         onPress={() => navigation.navigate('ProductDetail', { productId: Number(item.id) })}
